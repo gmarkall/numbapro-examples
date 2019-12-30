@@ -5,6 +5,11 @@ import time
 
 import numpy as np
 
+from _cupti_cffi import lib
+
+lib.initTrace()
+
+
 from numba import cuda
 from blackscholes_numba import black_scholes, black_scholes_numba
 
@@ -31,7 +36,7 @@ def cnd_cuda(d):
     return ret_val
 
 
-@cuda.jit
+@cuda.jit(debug=True)
 def black_scholes_cuda(callResult, putResult, S, X,
                        T, R, V):
     #    S = stockPrice
@@ -119,6 +124,8 @@ def main (*args):
     L1norm = delta.sum() / np.abs(callResultNumpy).sum()
     print("L1 norm (CUDA): %E" % L1norm)
     print("Max absolute error (CUDA): %E" % delta.max())
+
+    lib.finiTrace()
 
 if __name__ == "__main__":
     import sys
